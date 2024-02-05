@@ -80,7 +80,8 @@ async function completeForm(page) {
 
     await completeForm(page);
     incrementCount();
-
-    await page.waitForTimeout(1000);
+    await page.waitForNavigation()
+    await page.waitForNavigation()
+    // await page.waitForTimeout(1000);
   }
 })();
