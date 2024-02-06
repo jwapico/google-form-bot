@@ -1,14 +1,16 @@
-import puppeteer from "puppeteer";
+import puppeteer, { TimeoutError } from "puppeteer";
 import { getPoliticalIssues } from "./getPoliticalIssues.js";
 import { generateName } from "./getRandomName.js";
 import { incrementCount } from "./incrementCount.js";
+import { pickRandom, fetchData } from "./wordAPI.js";
+import { getEmail } from "./getEmails.js"
 
 async function completeForm(page) {
   // Randomly generate fake name, email, phone number, and 'political issue')
   const fullname = Math.random() < 0.5 ? String(await generateName("male")) : String(await generateName("female"));
   const firstName = fullname.split(" ")[0];
   const lastName = fullname.split(" ")[1];
-  const email = firstName + "_" + lastName + "_" + Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join("") + "@gmail.com";
+  const email = await getEmail(firstName, lastName);
   const possiblePhoneNumbers = [
     "5623575335",
     "+15623575335",
@@ -24,10 +26,10 @@ async function completeForm(page) {
     "+1562.257.5335",
     "+1.562.257.5335",
   ];
-  const phoneNumber = possiblePhoneNumbers[Math.floor(Math.random() * possiblePhoneNumbers.length)];
+  const phoneNumber = pickRandom(possiblePhoneNumbers);
 
   const possiblePoliticalIssues = await getPoliticalIssues();
-  const politicalIssue = possiblePoliticalIssues[Math.floor(Math.random() * possiblePoliticalIssues.length)];
+  const politicalIssue = pickRandom(possiblePoliticalIssues);
 
   // input the fake information into the form
   const inputValues = [firstName, lastName, email, phoneNumber];
@@ -56,8 +58,9 @@ async function completeForm(page) {
 
   const submitButton = await page.$$("div.uArJ5e.UQuaGc.Y5sE8d.VkkpIf.QvWxOd");
   await submitButton[0].click();
-  
+
 }
+
 
 (async () => {
   const url = "https://docs.google.com/forms/d/1HiJ6p51nsgrtVGuG8WRJuednz2ZOgsK2DMyOYoOqYWw/viewform?edit_requested=true";
@@ -80,8 +83,14 @@ async function completeForm(page) {
 
     await completeForm(page);
     incrementCount();
-    await page.waitForNavigation()
-    await page.waitForNavigation()
-    // await page.waitForTimeout(1000);
+    try {
+      await page.waitForNavigation()
+      // it wants 2 for some reason
+      await page.waitForNavigation()
+    }
+    catch (err) {
+      console.log("wait for redirect timed out, skipping...")
+    }
+
   }
 })();

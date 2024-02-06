@@ -1,21 +1,7 @@
-async function fetchData(url) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    return response.json();
-  } catch (error) {
-    console.error("Unable to fetch data:", error);
-  }
-}
+import {pickRandom, fetchData} from "./wordAPI.js"
 
 function fetchNames(nameType) {
   return fetchData(`https://www.randomlists.com/data/names-${nameType}.json`);
-}
-
-function pickRandom(list) {
-  return list[Math.floor(Math.random() * list.length)];
 }
 
 async function generateName(gender) {
