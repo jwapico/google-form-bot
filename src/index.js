@@ -4,6 +4,7 @@ import { generateName } from "./getRandomName.js";
 import { incrementCount } from "./incrementCount.js";
 import { pickRandom, fetchData } from "./wordAPI.js";
 import { getEmail } from "./getEmails.js"
+import { getNumber } from "./getRandomPhone.js"
 
 async function completeForm(page) {
   // Randomly generate fake name, email, phone number, and 'political issue')
@@ -26,7 +27,8 @@ async function completeForm(page) {
     "+1562.257.5335",
     "+1.562.257.5335",
   ];
-  const phoneNumber = pickRandom(possiblePhoneNumbers);
+  // const phoneNumber = pickRandom(possiblePhoneNumbers);
+  const phoneNumber = getNumber();
 
   const possiblePoliticalIssues = await getPoliticalIssues();
   const politicalIssue = pickRandom(possiblePoliticalIssues);
@@ -79,8 +81,11 @@ async function completeForm(page) {
   await page.goto(url);
 
   while (true) {
+    try{
     await page.goto(url);
-
+    }catch(err){
+      console.error("goto URL Failed, Trying again...")
+    }
     await completeForm(page);
     incrementCount();
     try {
@@ -89,7 +94,7 @@ async function completeForm(page) {
       await page.waitForNavigation()
     }
     catch (err) {
-      console.log("wait for redirect timed out, skipping...")
+      console.error("wait for redirect timed out, Trying again...")
     }
 
   }
